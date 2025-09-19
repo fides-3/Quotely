@@ -1,49 +1,63 @@
-export default function Signup(){
-
-  
-    
 
 
+export default function Signup() {
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <form className="bg-gradient-to-br from-white to-gray-100 max-w-md w-full rounded-2xl p-8 shadow-2xl space-y-6">
+        
+        {/* HEADING */}
+        <h1 className="text-center text-2xl font-bold text-amber-950">SIGNUP</h1>
 
-
-    return(
-
-        <div className="min-h-screen bg-white flex items-center justify-center">
-            <form className="bg-gradient-to-br max-w-xl rounded-xl p-8 flex shadow-xl">
-                {/* HEADING */}
-                <div className="p-8 w-full space-y-5">
-                <h1 className="text-center text-xl font-semibold mb-6" >SIGNUP</h1>
-                </div>
-                 
-                 {/* USERNAME */}
-                <div className="mb-4 relative">
-                    <label htmlFor="Username" className="mb-1 text-gray-300 block">Username</label>
-                    <input type ="text" name="Username" id="Username" className="border-gray-50 text-black px-4 py-2 mt-1"/>
-                </div>
-
-                {/* EMAIL */}
-                <div className="mb-4 relative">
-                    <label htmlFor="Email" className="mb-1 text-gray-300 block">Email</label>
-                    <input type="text" name="Email" id="Email"
-                    className="mt-1 border-gray-50 w-full px-4 py-2 text-black rounded-lg"/>
-                </div>
-
-                {/* Password */}
-                <div className="mb-1">
-                    <label htmlFor="Password"
-                    className="mb-1 text-gray-300 block rounded-lg">Password</label>
-                    <input type="Password" name="Password"
-                    id="Password"
-                    className="mt-1 px-4 py-2 w-full  border-gray-50 text-black rounded-lg"/>
-
-                </div>
-                
-                <button type="submit"  className="w-full mb-3 py-2 bg-amber-950 text-white">Signup
-                    
-                </button>
-
-            </form>
-
+        {/* USERNAME */}
+        <div className="space-y-2">
+          <label htmlFor="Username" className="text-gray-600 text-sm font-medium">
+            Username
+          </label>
+          <input
+            type="text"
+            name="Username"
+            id="Username"
+            placeholder="Enter your username"
+            className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
+          />
         </div>
-    )
+
+        {/* EMAIL */}
+        <div className="space-y-2">
+          <label htmlFor="Email" className="text-gray-600 text-sm font-medium">
+            Email
+          </label>
+          <input
+            type="email"
+            name="Email"
+            id="Email"
+            placeholder="Enter your email"
+            className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
+          />
+        </div>
+
+        {/* PASSWORD */}
+        <div className="space-y-2">
+          <label htmlFor="Password" className="text-gray-600 text-sm font-medium">
+            Password
+          </label>
+          <input
+            type="password"
+            name="Password"
+            id="Password"
+            placeholder="Enter your password"
+            className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
+          />
+        </div>
+
+        {/* BUTTON */}
+        <button
+          type="submit"
+          className="w-full py-3 bg-amber-950 text-white font-semibold rounded-lg shadow-md hover:bg-amber-900 transition"
+        >
+          Signup
+        </button>
+      </form>
+    </div>
+  );
 }
