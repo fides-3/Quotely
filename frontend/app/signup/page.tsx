@@ -28,7 +28,7 @@ const handleSubmit=async(e:any)=>{
   }
   try{
     console.log("Attempting registration with:",form);
-    const res=await axios.post("/auth/register",form);
+    const res=await axios.post("auth/register",form);
     console.log("Registration response:",res.data)
 
     setTimeout(()=>{
