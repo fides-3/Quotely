@@ -11,6 +11,8 @@ const [form,setForm]=useState({
   email:"",
   password:"",
 })
+const[success,setSuccess]=useState('');
+const [loading,setLoading]=useState(true);
 const handleChange= (e:any) =>{
   setForm({ ...form,[e.target.name]:e.target.value})
   if (error){
@@ -20,16 +22,20 @@ const handleChange= (e:any) =>{
 const handleSubmit=async(e:any)=>{
   e.preventDefault();
   setError("");
+  setSuccess("")
+  setLoading(true);
   
   if(form.password.length<6){
     setError("password must be atleast 6 characters long");
+    setLoading(false);
     return
 
   }
   try{
     console.log("Attempting registration with:",form);
-    const res=await axios.post("auth/register",form);
-    console.log("Registration response:",res.data)
+    const res=await axios.post("/auth/register",form);
+    console.log("Registration response:",res.data);
+    setSuccess("Registration successful!You can now log in.")
 
     setTimeout(()=>{
       router.push("/login");
@@ -50,6 +56,8 @@ const handleSubmit=async(e:any)=>{
       err.response?.data?.message||
       `Registration failed: ${err.message}`;
       setError(errorMessage)
+    }finally{
+      setLoading(false)
     }
 
 
@@ -61,7 +69,7 @@ const handleSubmit=async(e:any)=>{
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <form className="bg-amber-50 max-w-md w-full rounded-2xl p-8 shadow-xl space-y-6">
+      <form onSubmit={handleSubmit} className="bg-amber-50 max-w-md w-full rounded-2xl p-8 shadow-xl space-y-6">
         
         {/* HEADING */}
         <h1 className="text-center text-2xl font-bold text-black">SIGNUP</h1>
@@ -73,8 +81,8 @@ const handleSubmit=async(e:any)=>{
           </label>
           <input
             type="text"
-            name="Username"
-            id="Username"
+            name="username"
+            id="username"
             placeholder="Enter your username"
             className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
             onChange={handleChange}
@@ -88,8 +96,8 @@ const handleSubmit=async(e:any)=>{
           </label>
           <input
             type="email"
-            name="Email"
-            id="Email"
+            name="email"
+            id="email"
             placeholder="Enter your email"
             className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
             onChange={handleChange}
@@ -103,8 +111,8 @@ const handleSubmit=async(e:any)=>{
           </label>
           <input
             type="password"
-            name="Password"
-            id="Password"
+            name="password"
+            id="password"
             placeholder="Enter your password"
             className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
             onChange={handleChange}
@@ -118,6 +126,13 @@ const handleSubmit=async(e:any)=>{
         >
           Signup
         </button>
+        {error&&(
+          <div className="text-red-700 text-sm">{error}</div>)}
+
+          {success&&(
+            <div className="text-green-400 text-sm">{success}</div>
+          )}
+        
       </form>
     </div>
   );
