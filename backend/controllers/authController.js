@@ -3,7 +3,19 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
-export const register=async(requestAnimationFrame,res)=>{
+// const generateAccessToken=(user)=>{
+//     return jwt.sign({id:user._id},
+//         process.env.ACCESS_TOKEN_SECRET,{
+//             expiresIn:"15m",
+//         }
+//     )
+// };
+
+// const generateRefreshToken=(user)=>{
+//     return crypto.randomBytes(64).toString('hex');
+// }
+
+export const register=async(req,res)=>{
     const{username,email,password}=req.body;
 
     try{
@@ -33,12 +45,12 @@ export const register=async(requestAnimationFrame,res)=>{
             const ValidationErrors=Object.values(error.errors).map(err=>err.message);
             return res.status(400).json({
                 error:'Validation error',
-                details:validationErrors
+                details:ValidationErrors
             });
             
         }
         res.status(500).json({
-            error:"Regiatrtion failed",
+            error:"Registrtion failed",
             details:error.message
         });
     }
