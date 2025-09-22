@@ -9,12 +9,12 @@ node_modules/
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+.env
 # testing
 /coverage
 
 # next.js
-/.next/
+frontend/.next/
 /out/
 
 # production
