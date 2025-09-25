@@ -1,6 +1,6 @@
 import axios  from "axios";
 const axiosInstance=axios.create({
-    baseURL:"http://localhost:3000",
+    baseURL:"http://localhost:5000",
     withCredentials:true,
 
 })
@@ -43,7 +43,7 @@ async(error)=>{
             // Try to refresh the token
             const refreshResponse=await axios.get("/auth/refresh",{
                 withCredentials:true,
-                baseURL: "https://localhost:5000",
+                baseURL: "http://localhost:5000",
             })
 
             if (refreshResponse.data.accessToken){
@@ -57,7 +57,7 @@ async(error)=>{
                 }
                 // Retry original request with new token
                 OriginalRequest.headers.Authorization=`Bearer ${refreshResponse.data.accessToken}`;
-                return axiosInstance(originalRequest)
+                return axiosInstance(OriginalRequest)
             }
         }catch(refreshError){
             // Refresh failed redirect to login
