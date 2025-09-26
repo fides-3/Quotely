@@ -1,9 +1,11 @@
 import express from 'express';
-const router=express.Router();
-import *  as authContoller from '../controllers/authController.js';
+const router = express.Router();
+import * as authController from '../controllers/authController.js';
 // import {verifyToken} from '../middleware/verifyToken.js'
 
-router.post("/register",authContoller.register);
-router.post("/login",authContoller.login)
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+router.post('/forgotPassword', authController.forgotPassword);
+router.post('/resetPassword', authController.resetPassword);
 
 export default router;
