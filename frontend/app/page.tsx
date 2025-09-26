@@ -42,7 +42,7 @@ export default function LandingPage() {
         {/* QUOTE OF THE DAY */}
         <section className="py-8 bg-amber-50/80 dark:bg-gray-800/80 text-center">
           <blockquote className="text-xl italic font-medium text-amber-950 dark:text-amber-50 max-w-2xl mx-auto px-4">
-            "The future belongs to those who believe in the beauty of their dreams."
+            &ldquo;The future belongs to those who believe in the beauty of their dreams.&rdquo;
           </blockquote>
           <p className="mt-2 text-amber-800 dark:text-amber-200">— Eleanor Roosevelt</p>
         </section>
