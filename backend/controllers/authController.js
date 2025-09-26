@@ -92,3 +92,66 @@ export const refreshToken=async(req,res)=>{
     const accessToken=generateAccessToken(user);
     res.json({accessToken});
 }
+
+export const forgotPassword=async(req,res)=>{
+    const{email}=req.body;
+    try{
+        const user=await User.findOne({email});
+
+        if(!user){
+            return res.status(400).json({error:'User with this email does not exist'});
+        }
+        const resetToken=crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry=Date.now() + 3600000
+
+        await User.findByIdAndUpdate(user._id,{
+            resetPasswordToken:resetToken,
+            resetPasswordExpires:resetTokenExpiry
+        });
+
+        res.json ({
+            success:true,
+            message:'Password reset token generated',
+            resetToken:resetToken
+        });
+        }catch(error){
+            console.error('forgot Password error:',error);
+            res.status(500).json({
+                error:'Failed to process password reset request',
+                details:error.message,
+            });
+        }
+    }
+export const resetPassword=async(req,res)=>{
+    const{resetToken,newPassword}=req.body;
+    try{
+        const user=await User.findOne({
+            resetPasswordToken:resetToken,
+            resetPasswordExpires:{$gt:Date.now()}
+        })
+
+        if (!user){
+            return res.status(400).json({error:'Invalid or expired reset token'});  
+        }
+        const hashedPwd=await bcrypt.hash(newPassword,10);
+
+        await User.findByIdAndUpdate(user._id,{
+            password:hashedPwd,
+            $unset:{
+                resetPasswordToken:1,
+                resetPasswordExpires:1
+            }
+        });
+        res.json({
+            success:true,
+            message:'apassword has been reset successfully'
+        })
+    }catch(error){
+        console.error('Reset Password Error:',error);
+        res.status(500).json(({
+            error:'Failed to reset password',
+            details:error.message,
+
+        }))
+    }
+}
