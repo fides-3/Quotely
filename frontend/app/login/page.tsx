@@ -142,7 +142,7 @@ export default function Login(){
                </div>
                
                <div className="flex justify-end w-full">
-                 <Link href="/passwordReset" className="text-sm text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100">
+                 <Link href="/passwordreset" className="text-sm text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100">
                    Forgot your password?
                  </Link>
                </div>
