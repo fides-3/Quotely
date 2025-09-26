@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation'
 import axios from '../api/axiosInstance'
+import { ThemeToggle } from '../theme-toggle'
 
 // Define interfaces for better type safety
 interface FormData {
@@ -93,15 +94,31 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="bg-amber-50 max-w-md w-full rounded-2xl p-8 shadow-xl space-y-6">
-        
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-amber-200 dark:from-gray-900 dark:to-gray-800 flex flex-col">
+      {/* NAVBAR */}
+      <header className="flex items-center justify-between px-6 py-3 bg-amber-100/90 dark:bg-gray-800/90 shadow-sm">
+        <div className="text-xl font-bold text-amber-950 dark:text-amber-50">Quotely</div>
+        <nav className="flex items-center space-x-3">
+          <a href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+            Home
+          </a>
+          <a href="/login" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+            Login
+          </a>
+          <ThemeToggle />
+        </nav>
+      </header>
+
+      {/* FORM SECTION */}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 max-w-md w-full rounded-2xl p-8 shadow-xl space-y-6">
+
         {/* HEADING */}
-        <h1 className="text-center text-2xl font-bold text-black">SIGNUP</h1>
+        <h1 className="text-center text-2xl font-bold text-amber-950 dark:text-amber-50">SIGNUP</h1>
 
         {/* USERNAME */}
         <div className="space-y-2">
-          <label htmlFor="username" className="text-gray-600 text-sm font-medium">
+          <label htmlFor="username" className="text-amber-900 dark:text-amber-200 text-sm font-medium">
             Username
           </label>
           <input
@@ -109,7 +126,7 @@ export default function Signup() {
             name="username"
             id="username"
             placeholder="Enter your username"
-            className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 focus:outline-none"
             onChange={handleChange}
             value={form.username}
           />
@@ -117,7 +134,7 @@ export default function Signup() {
 
         {/* EMAIL */}
         <div className="space-y-2">
-          <label htmlFor="email" className="text-gray-600 text-sm font-medium">
+          <label htmlFor="email" className="text-amber-900 dark:text-amber-200 text-sm font-medium">
             Email
           </label>
           <input
@@ -125,7 +142,7 @@ export default function Signup() {
             name="email"
             id="email"
             placeholder="Enter your email"
-            className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 focus:outline-none"
             onChange={handleChange}
             value={form.email}
           />
@@ -133,7 +150,7 @@ export default function Signup() {
 
         {/* PASSWORD */}
         <div className="space-y-2">
-          <label htmlFor="password" className="text-gray-600 text-sm font-medium">
+          <label htmlFor="password" className="text-amber-900 dark:text-amber-200 text-sm font-medium">
             Password
           </label>
           <input
@@ -141,7 +158,7 @@ export default function Signup() {
             name="password"
             id="password"
             placeholder="Enter your password"
-            className="w-full rounded-lg border border-gray-300 text-black px-4 py-2 focus:ring-2 focus:ring-amber-950 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 focus:outline-none"
             onChange={handleChange}
             value={form.password}
           />
@@ -151,20 +168,31 @@ export default function Signup() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-amber-950 text-white font-semibold rounded-lg shadow-md hover:bg-amber-900 transition disabled:opacity-50"
+          className="w-full py-3 bg-amber-950 dark:bg-amber-200 text-amber-50 dark:text-gray-900 font-semibold rounded-lg shadow-md hover:bg-amber-900 dark:hover:bg-amber-100 transition disabled:opacity-50"
         >
-          {loading ? 'Signing up...' : 'Signup'}
+          {loading ? 'Signing up...' : 'Sign up'}
         </button>
         
         {error && (
-          <div className="text-red-700 text-sm">{error}</div>
+          <div className="text-red-700 dark:text-red-400 text-sm bg-red-100 dark:bg-red-900/30 p-2 rounded">{error}</div>
         )}
 
         {success && (
-          <div className="text-green-400 text-sm">{success}</div>
+          <div className="text-green-600 dark:text-green-400 text-sm bg-green-100 dark:bg-green-900/30 p-2 rounded">{success}</div>
         )}
+
+        {/* Login Link */}
+        <div className="text-center">
+          <span className="text-amber-900 dark:text-amber-200 text-sm">
+            Already have an account?{" "}
+          </span>
+          <a href="/login" className="text-amber-950 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-100 font-medium">
+            Login
+          </a>
+        </div>
         
       </form>
+    </div>
     </div>
   );
 }
