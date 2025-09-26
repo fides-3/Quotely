@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from 'next/navigation'
 import axios from '../api/axiosInstance'
 import { ThemeToggle } from '../theme-toggle'
+import Link from 'next/link'
 
 // Define interfaces for better type safety
 interface FormData {
@@ -99,12 +100,12 @@ export default function Signup() {
       <header className="flex items-center justify-between px-6 py-3 bg-amber-100/90 dark:bg-gray-800/90 shadow-sm">
         <div className="text-xl font-bold text-amber-950 dark:text-amber-50">Quotely</div>
         <nav className="flex items-center space-x-3">
-          <a href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          <Link href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Home
-          </a>
-          <a href="/login" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/login" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Login
-          </a>
+          </Link>
           <ThemeToggle />
         </nav>
       </header>
