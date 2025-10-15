@@ -101,8 +101,6 @@ export default function Login(){
         </nav>
       </header>
           
-
-
           <div className='flex flex-1  items-center justify-center p-4'>
             <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 max-w-md w-full rounded-2xl p-8 shadow-xl space-y-6 relative">
              
@@ -146,7 +144,7 @@ export default function Login(){
                    Forgot your password?
                  </Link>
                </div>
-
+                <Link href="/quoteinput">
                <button
                  type="submit"
                  disabled={loading}
@@ -154,6 +152,7 @@ export default function Login(){
                >
                 Login
                </button>
+                </Link>
 
                {error && (
                  <div className="text-red-700 dark:text-red-400 text-sm bg-red-100 dark:bg-red-900/30 p-2 rounded">{error}</div>
