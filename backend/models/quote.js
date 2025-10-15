@@ -7,8 +7,7 @@ const quoteSchema=new mongoose.Schema({
         trim:true
     },
     author:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'User',
+        type:String,
         required:true
     }
 }, { 
