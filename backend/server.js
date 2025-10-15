@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 import authRoute from './routes/authRoutes.js';
 import dotenv from 'dotenv';
+import quoteRoute from './routes/quoteRoutes.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(express.static(path.join(__dirname,'public')))
 
 
 app.use("/auth",authRoute);
+app.use("/quote",quoteRoute);
 
 app.get("/",(req,res)=>{
     res.send('API is running...');
