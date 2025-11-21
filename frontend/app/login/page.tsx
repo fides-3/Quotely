@@ -51,11 +51,11 @@ export default function Login(){
             if(res.data.accessToken){
                 const authData = {
                     accessToken: res.data.accessToken,
-                    user: {email: form.email},
+                    user: { email: form.email },
                 };
                 setAuth(authData);
-                localStorage.setItem('auth', JSON.stringify(authData));
-                router.push("/");
+                console.log('Login successful, auth data:', authData);
+                router.push("/quoteinput");
             } else {
                 setError('Invalid response from server');
             }
@@ -144,15 +144,14 @@ export default function Login(){
                    Forgot your password?
                  </Link>
                </div>
-                <Link href="/quoteinput">
+               
                <button
                  type="submit"
                  disabled={loading}
                  className="w-full py-3 bg-amber-950 dark:bg-amber-200 text-amber-50 dark:text-gray-900 font-semibold rounded-lg shadow-md hover:bg-amber-900 dark:hover:bg-amber-100 transition disabled:opacity-50"
                >
-                Login
+                {loading ? 'Logging in...' : 'Login'}
                </button>
-                </Link>
 
                {error && (
                  <div className="text-red-700 dark:text-red-400 text-sm bg-red-100 dark:bg-red-900/30 p-2 rounded">{error}</div>
