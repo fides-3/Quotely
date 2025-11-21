@@ -1,4 +1,5 @@
-import User from  '../models/User.js';
+
+import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
@@ -83,15 +84,18 @@ export const login=async(req,res)=>{
     }
 }
 
-export const refreshToken=async(req,res)=>{
+export const refreshToken=async(req,res)=>{    
     const cookies=req.cookies;
     if(!cookies?.jwt)
         return res.status(401).json({error:'No token'});
     const refreshToken=cookies.jwt;
     const user=await User.findOne({refreshToken});
+    if(!user){
+        return res.status(401).json({error:'Invalid refresh token'});
+    }
     const accessToken=generateAccessToken(user);
     res.json({accessToken});
-}
+};
 
 export const forgotPassword=async(req,res)=>{
     const{email}=req.body;
@@ -154,4 +158,144 @@ export const resetPassword=async(req,res)=>{
 
         }))
     }
+}
+
+export const logout=async(req,res)=>{
+    
+        const cookies=req.cookies;
+        if(!cookies?.jwt){
+            return res.sendStatus(204);
+            const user=await User.findOne({refreshToken:cookies.jwt});
+            if(user){
+                user.refreshToken=""
+                await user.save()
+            }
+            res.clearCookie("jwt",{httpOnly:true});
+            res.json({message:'Logged out successfully'})
+        }
+    }
+
+
+// get profile
+export const getprofile=async(req,res)=>{
+    try{
+        console.log('Profile request for user ID:',req.user.id);
+        const user=await User.findById(req.user.id).select('-password -refreshToken');
+        if(!user){
+            console.log('User not found with ID:',req.user.id);
+            return res.status(404).json({
+                error:'User not found'
+            });
+        }
+        console.log('Profile found for user:',user.username)
+        res.json({
+            success:true,
+            user:user
+        });
+    }catch(error){
+        console.error('Profile fetch error:',error);
+        res.status(500).json({
+            error:'Failed to fetch profile',
+            details:error.message,
+        })
+    }
+}
+
+// update user profile
+export const updateProfile=async(req,res)=>{
+    try{
+        const {username,email,name,avatar}=req.body;
+        const userId=req.user.id;
+
+        // check if email is already taken by another user
+
+        if(email){
+            const existingUser=await User.findOne({
+                email,
+                _id:{$ne : userId}
+            })
+            if(existingUser){
+                return res.status(409).json({
+                    error:'Email already taken'
+                })
+            }
+        }
+        if(username){
+            const existingUser=await User.findOne({
+                username,
+                _id: {$ne : userId}
+            })
+            if(existingUser){
+                return res.status(409).json({
+                    error:'Username already taken'
+                })
+            }
+        }
+
+        const updateData={}
+        if(username){
+            updateData.username=username;
+        }
+        if(email){
+            updateData.email=email;
+        }
+        if(name!==undefined){
+            updateData.name=name;
+        }
+        if(avatar!==undefined){
+            updateData.avatar=avatar;
+        }
+        const updatedUser=await User.findByIdAndUpdate(
+            userId,
+            updateData,
+            {new:true,runValidators:true}).select('-password -refreshToken');
+        
+            if(!updatedUser){
+                return res.status(404).json({error:'User not found'})
+            }
+            res.json({
+                success:true,
+                message:'Profile updated successfully',
+                user:updatedUser
+            })
+
+
+
+    }catch(error){
+        if(error.name==='ValidationError'){
+            const validationErrors=Object.values(error.errors).map(err=>err.message);
+            return res.status(400).json({
+                error:'Validation error',
+                details:validationErrors
+            })
+        }
+        res.status(500).json({
+            error:'Failed to update profile',
+            details:error.message,
+        })
+    }
+}
+
+export const deleteProfile=async(req,res)=>{
+    try{
+        const userId=req.user.id;
+        const deletedUser=await User.findByIdAndDelete(userId)
+
+        if(!deletedUser){
+            return res.status(404).json({error:'User not found'});
+        }
+
+        res.clearCookie("jwt",{httpOnly:true})
+         res.json({
+            success:true,
+            message:'Account deleted successfully'
+         })
+    }catch(error){
+        res.status(500).json({
+            error:'Failed to delete account',
+            details:error.message,
+        })
+    }
+
+
 }
