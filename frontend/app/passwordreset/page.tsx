@@ -137,7 +137,8 @@ export default function PasswordReset() {
                                     autoFocus
                                     value={email}
                                     onChange={handleEmailChange}
-                                    placeholder="Enter your email"
+                                    placeholder="E
+                                    nter your email"
                                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 focus:outline-none"
                                     disabled={loading}
                                 />
