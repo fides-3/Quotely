@@ -43,11 +43,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const updateAuth = (newAuth: AuthState) => {
+    console.log('AuthContext: Setting new auth state:', newAuth);
     setAuth(newAuth);
     if (newAuth.accessToken) {
       localStorage.setItem("auth", JSON.stringify(newAuth));
+      console.log('AuthContext: Stored in localStorage');
     } else {
       localStorage.removeItem("auth");
+      console.log('AuthContext: Removed from localStorage');
     }
   };
 
