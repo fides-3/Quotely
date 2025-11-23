@@ -26,6 +26,7 @@ export default function Profile() {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [quoteCount, setQuoteCount] = useState(0);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -34,20 +35,27 @@ export default function Profile() {
     }
   }, [authLoading, isAuthenticated, router]);
 
-  // Fetch user profile data
+  // Fetch user profile data and quote count
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileData = async () => {
       if (!isAuthenticated) return;
       
       try {
-        const response = await axios.get('http://localhost:5000/auth/profile');
-        if (response.data.success) {
-          setUser(response.data.user);
+        // Fetch profile data
+        const profileResponse = await axios.get('http://localhost:5000/auth/profile');
+        if (profileResponse.data.success) {
+          setUser(profileResponse.data.user);
           setEditForm({
-            username: response.data.user.username || '',
-            email: response.data.user.email || '',
-            name: response.data.user.name || ''
+            username: profileResponse.data.user.username || '',
+            email: profileResponse.data.user.email || '',
+            name: profileResponse.data.user.name || ''
           });
+        }
+
+        // Fetch quote count
+        const quotesResponse = await axios.get('/quote/my-quotes');
+        if (quotesResponse.data.success) {
+          setQuoteCount(quotesResponse.data.count || 0);
         }
       } catch (err: any) {
         setError('Failed to load profile data');
@@ -58,7 +66,7 @@ export default function Profile() {
     };
 
     if (isAuthenticated) {
-      fetchProfile();
+      fetchProfileData();
     }
   }, [isAuthenticated]);
 
@@ -192,6 +200,12 @@ export default function Profile() {
           </a>
           <a href="/quoteinput" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Add Quote
+          </a>
+          <a href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+            My Collection
+          </a>
+          <a href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+            Search Users
           </a>
           <ThemeToggle />
         </nav>
@@ -360,13 +374,12 @@ export default function Profile() {
                   Account Stats
                 </h2>
                 <div className="space-y-4">
-                  <div className="text-center p-4 bg-amber-50 dark:bg-gray-600 rounded-lg">
-                    <div className="text-2xl font-bold text-amber-950 dark:text-amber-50">0</div>
+                  <div className="text-center p-4 bg-amber-50 dark:bg-gray-600 rounded-lg cursor-pointer hover:bg-amber-100 dark:hover:bg-gray-500 transition-colors" onClick={() => router.push('/personalcollection')}>
+                    <div className="text-2xl font-bold text-amber-950 dark:text-amber-50">{quoteCount}</div>
                     <div className="text-sm text-amber-700 dark:text-amber-300">Quotes Posted</div>
-                  </div>
-                  <div className="text-center p-4 bg-amber-50 dark:bg-gray-600 rounded-lg">
-                    <div className="text-2xl font-bold text-amber-950 dark:text-amber-50">0</div>
-                    <div className="text-sm text-amber-700 dark:text-amber-300">Likes Received</div>
+                    {quoteCount > 0 && (
+                      <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">Click to view</div>
+                    )}
                   </div>
                   {user?.createdAt && (
                     <div className="text-center p-4 bg-amber-50 dark:bg-gray-600 rounded-lg">
