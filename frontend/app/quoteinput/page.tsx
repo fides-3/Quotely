@@ -1,48 +1,75 @@
 "use client"
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '../context/AuthContext'
 import { ThemeToggle } from "../theme-toggle";
-import { QuoteIcon, UserIcon, SendIcon } from "lucide-react"; // Importing icons for a cleaner look
+import { QuoteIcon, UserIcon, SendIcon } from "lucide-react";
 import axios from '../api/axiosInstance'
 
 export default function QuoteInput() {
-
+  const router = useRouter()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState('')
+  const [error, setError] = useState('')
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setContent("")
-    setAuthor("")
+    setLoading(true)
+    setError('')
+    setSuccess('')
+    
     try{
-        const res =await axios.post('http://localhost:5000/quote/createQuote', {content, author});
-        if(res.status===201){
-            console.log("Quote successfully saved");
-        }else{
-            console.error("Failed to save quote");
-        }   
-    }catch(error){
+        const res = await axios.post('/quote/createQuote', {content, author});
+        if(res.data.success){
+            setSuccess('Quote saved successfully to your collection!');
+            setContent("")
+            setAuthor("")
+        }
+    }catch(error: any){
         console.error("Error submitting quote:", error);
-   
+        setError(error.response?.data?.error || 'Failed to save quote');
+    } finally {
+        setLoading(false)
     }
-    }   
+  }   
      
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-950 dark:border-amber-200 mx-auto"></div>
+          <p className="mt-4 text-amber-800 dark:text-amber-200">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect in useEffect
+  }
+
   return (
-    // The main container needs 'flex-col' to allow the header and main content to stack.
-    // I've also adjusted the class on the main div to center the form content.
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-amber-50 to-amber-100 dark:from-gray-900 dark:to-gray-800">
       
       {/* --- Header --- */}
       <header className="flex items-center justify-between px-6 py-3 bg-amber-100/90 dark:bg-gray-800/90 shadow-lg sticky top-0 z-10">
         <div className="text-xl font-bold text-amber-950 dark:text-amber-50">Quotely</div>
         <nav className="flex items-center space-x-3">
-          <a href="/login" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Login</a>
-          <a
-            href="/signup"
-            className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150"
-          >
-            Sign Up
-          </a>
+          <a href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Home</a>
+          <a href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">My Collection</a>
+          <a href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Search Users</a>
+          <a href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Profile</a>
           <ThemeToggle />
         </nav>
       </header>
@@ -100,13 +127,27 @@ export default function QuoteInput() {
               />
             </div>
 
+            {/* Success/Error Messages */}
+            {success && (
+              <div className="p-4 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-300 rounded-lg">
+                {success}
+              </div>
+            )}
+            
+            {error && (
+              <div className="p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg">
+                {error}
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full flex justify-center items-center space-x-2 py-3 px-4 border border-transparent text-lg font-semibold rounded-lg shadow-md text-white bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition duration-200"
+              disabled={loading}
+              className="w-full flex justify-center items-center space-x-2 py-3 px-4 border border-transparent text-lg font-semibold rounded-lg shadow-md text-white bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition duration-200 disabled:opacity-50"
             >
               <SendIcon className="w-5 h-5" />
-              <span>Save Quote</span>
+              <span>{loading ? 'Saving...' : 'Save Quote'}</span>
             </button>
           </form>
         </div>
