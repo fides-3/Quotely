@@ -11,6 +11,8 @@ router.get('/refresh', authController.refreshToken);
 router.get('/profile', verifyToken, authController.getprofile);
 router.put('/profile', verifyToken, authController.updateProfile);
 router.delete('/profile', verifyToken, authController.deleteProfile);
+router.get('/search', authController.searchUsers);
+router.get('/public-profile/:userId', authController.getPublicProfile);
 router.post('/logout', authController.logout);
 
 export default router;
