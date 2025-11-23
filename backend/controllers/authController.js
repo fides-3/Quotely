@@ -1,5 +1,5 @@
 
-import User from '../models/User.js';
+import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
@@ -296,6 +296,61 @@ export const deleteProfile=async(req,res)=>{
             details:error.message,
         })
     }
+}
 
+// Search users by username
+export const searchUsers = async (req, res) => {
+    try {
+        const { query } = req.query;
+        
+        if (!query || query.trim().length < 2) {
+            return res.status(400).json({
+                error: 'Search query must be at least 2 characters long'
+            });
+        }
 
+        const users = await User.find({
+            username: { $regex: query, $options: 'i' }
+        })
+        .select('username email name avatar createdAt')
+        .limit(10);
+
+        res.json({
+            success: true,
+            data: users
+        });
+    } catch (error) {
+        console.error('Search users error:', error);
+        res.status(500).json({
+            error: 'Failed to search users',
+            details: error.message
+        });
+    }
+}
+
+// Get public profile by user ID
+export const getPublicProfile = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        const user = await User.findById(userId)
+            .select('username email name avatar createdAt');
+            
+        if (!user) {
+            return res.status(404).json({
+                error: 'User not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            user: user
+        });
+    } catch (error) {
+        console.error('Get public profile error:', error);
+        res.status(500).json({
+            error: 'Failed to fetch user profile',
+            details: error.message
+        });
+    }
 }
