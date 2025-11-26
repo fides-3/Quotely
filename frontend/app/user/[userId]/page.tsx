@@ -1,10 +1,10 @@
 'use client'
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from    '../context/AuthContext';
-import { ThemeToggle } from '../theme-toggle';
-import { QuoteIcon, HeartIcon, MessageCircleIcon, UserIcon, SendIcon } from 'lucide-react';
-import axios from '../api/axiosInstance';
+import { useAuth } from    '../../context/AuthContext';
+import { ThemeToggle } from '../../theme-toggle';
+import { QuoteIcon, HeartIcon, MessageCircleIcon, UserIcon, SendIcon, EditIcon, Trash2Icon, CheckIcon, XIcon } from 'lucide-react';
+import axios from '../../api/axiosInstance';
 
 interface User {
   _id: string;
@@ -23,6 +23,7 @@ interface Comment {
   };
   content: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 interface Quote {
@@ -46,6 +47,9 @@ export default function PublicProfile() {
   const [error, setError] = useState('');
   const [commentInputs, setCommentInputs] = useState<{[key: string]: string}>({});
   const [submittingComments, setSubmittingComments] = useState<{[key: string]: boolean}>({});
+  const [editingComments, setEditingComments] = useState<{[key: string]: boolean}>({});
+  const [editCommentInputs, setEditCommentInputs] = useState<{[key: string]: string}>({});
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const userId = params.userId as string;
 
@@ -85,6 +89,24 @@ export default function PublicProfile() {
       fetchUserData();
     }
   }, [isAuthenticated, userId]);
+
+  // Get current user ID for edit permissions
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const response = await axios.get('/auth/profile');
+        if (response.data.success) {
+          setCurrentUserId(response.data.user._id);
+        }
+      } catch (err) {
+        console.error('Failed to get current user:', err);
+      }
+    };
+
+    if (isAuthenticated) {
+      getCurrentUser();
+    }
+  }, [isAuthenticated]);
 
   const handleLikeQuote = async (quoteId: string) => {
     try {
@@ -131,6 +153,63 @@ export default function PublicProfile() {
       console.error('Comment error:', err);
     } finally {
       setSubmittingComments(prev => ({ ...prev, [quoteId]: false }));
+    }
+  };
+
+  const handleEditComment = (commentId: string, currentContent: string) => {
+    setEditingComments(prev => ({ ...prev, [commentId]: true }));
+    setEditCommentInputs(prev => ({ ...prev, [commentId]: currentContent }));
+  };
+
+  const handleCancelEdit = (commentId: string) => {
+    setEditingComments(prev => ({ ...prev, [commentId]: false }));
+    setEditCommentInputs(prev => ({ ...prev, [commentId]: '' }));
+  };
+
+  const handleSaveEdit = async (quoteId: string, commentId: string) => {
+    const content = editCommentInputs[commentId]?.trim();
+    if (!content) return;
+
+    try {
+      const response = await axios.put(`/quote/${quoteId}/comment/${commentId}`, { content });
+      if (response.data.success) {
+        setQuotes(prev => prev.map(quote => 
+          quote._id === quoteId 
+            ? {
+                ...quote, 
+                comments: quote.comments.map(comment => 
+                  comment._id === commentId 
+                    ? response.data.comment
+                    : comment
+                )
+              }
+            : quote
+        ));
+        setEditingComments(prev => ({ ...prev, [commentId]: false }));
+        setEditCommentInputs(prev => ({ ...prev, [commentId]: '' }));
+      }
+    } catch (err: any) {
+      console.error('Edit comment error:', err);
+    }
+  };
+
+  const handleDeleteComment = async (quoteId: string, commentId: string) => {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+
+    try {
+      const response = await axios.delete(`/quote/${quoteId}/comment/${commentId}`);
+      if (response.data.success) {
+        setQuotes(prev => prev.map(quote => 
+          quote._id === quoteId 
+            ? {
+                ...quote, 
+                comments: quote.comments.filter(comment => comment._id !== commentId)
+              }
+            : quote
+        ));
+      }
+    } catch (err: any) {
+      console.error('Delete comment error:', err);
     }
   };
 
@@ -295,23 +374,87 @@ export default function PublicProfile() {
                   {/* COMMENTS SECTION */}
                   {quote.comments && quote.comments.length > 0 && (
                     <div className="mb-4 space-y-3">
-                      {quote.comments.map((comment) => (
-                        <div key={comment._id} className="bg-amber-50 dark:bg-gray-700 rounded-lg p-3">
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                                {comment.userId.username}
-                              </p>
-                              <p className="text-amber-800 dark:text-amber-200 mt-1">
-                                {comment.content}
-                              </p>
-                              <p className="text-amber-600 dark:text-amber-400 text-xs mt-1">
-                                {formatDate(comment.createdAt)}
-                              </p>
+                      {quote.comments.map((comment) => {
+                        const canEditComment = currentUserId === comment.userId._id;
+                        const canDeleteComment = currentUserId === comment.userId._id || currentUserId === quote.userId._id;
+                        
+                        return (
+                          <div key={comment._id} className="bg-amber-50 dark:bg-gray-700 rounded-lg p-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-1">
+                                  {comment.userId.username}
+                                </p>
+                                
+                                {editingComments[comment._id] ? (
+                                  <div className="space-y-2">
+                                    <input
+                                      type="text"
+                                      value={editCommentInputs[comment._id] || ''}
+                                      onChange={(e) => setEditCommentInputs(prev => ({ ...prev, [comment._id]: e.target.value }))}
+                                      className="w-full px-3 py-2 rounded border border-amber-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-amber-900 dark:text-amber-100 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm"
+                                      onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit(quote._id, comment._id)}
+                                    />
+                                    <div className="flex space-x-2">
+                                      <button
+                                        onClick={() => handleSaveEdit(quote._id, comment._id)}
+                                        className="flex items-center space-x-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
+                                      >
+                                        <CheckIcon className="w-3 h-3" />
+                                        <span>Save</span>
+                                      </button>
+                                      <button
+                                        onClick={() => handleCancelEdit(comment._id)}
+                                        className="flex items-center space-x-1 px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 transition-colors"
+                                      >
+                                        <XIcon className="w-3 h-3" />
+                                        <span>Cancel</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <p className="text-amber-800 dark:text-amber-200 mt-1">
+                                      {comment.content}
+                                    </p>
+                                    <p className="text-amber-600 dark:text-amber-400 text-xs mt-1">
+                                      {formatDate(comment.createdAt)}
+                                      {comment.updatedAt && (
+                                        <span className="ml-2 text-amber-500 dark:text-amber-400">
+                                          (edited)
+                                        </span>
+                                      )}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                              
+                              {!editingComments[comment._id] && (canEditComment || canDeleteComment) && (
+                                <div className="flex space-x-2 ml-2">
+                                  {canEditComment && (
+                                    <button
+                                      onClick={() => handleEditComment(comment._id, comment.content)}
+                                      className="p-1 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+                                      title="Edit comment"
+                                    >
+                                      <EditIcon className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                  {canDeleteComment && (
+                                    <button
+                                      onClick={() => handleDeleteComment(quote._id, comment._id)}
+                                      className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                                      title="Delete comment"
+                                    >
+                                      <Trash2Icon className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
