@@ -166,6 +166,108 @@ export const addComment = async (req, res) => {
     }
 };
 
+// Edit a comment
+export const editComment = async (req, res) => {
+    try {
+        const { quoteId, commentId } = req.params;
+        const { content } = req.body;
+        const userId = req.user.id;
+        
+        if (!content || content.trim().length === 0) {
+            return res.status(400).json({
+                error: 'Comment content is required'
+            });
+        }
+        
+        const quote = await Quote.findById(quoteId);
+        if (!quote) {
+            return res.status(404).json({
+                error: 'Quote not found'
+            });
+        }
+        
+        const comment = quote.comments.id(commentId);
+        if (!comment) {
+            return res.status(404).json({
+                error: 'Comment not found'
+            });
+        }
+        
+        // Check if user owns the comment
+        if (comment.userId.toString() !== userId) {
+            return res.status(403).json({
+                error: 'You can only edit your own comments'
+            });
+        }
+        
+        comment.content = content.trim();
+        comment.updatedAt = new Date();
+        
+        await quote.save();
+        
+        // Populate the updated comment with user info
+        const populatedQuote = await Quote.findById(quoteId)
+            .populate('comments.userId', 'username');
+        
+        const updatedComment = populatedQuote.comments.id(commentId);
+        
+        res.json({
+            success: true,
+            message: 'Comment updated successfully',
+            comment: updatedComment
+        });
+    } catch (error) {
+        console.error('Edit Comment Error:', error);
+        res.status(500).json({
+            error: 'Failed to edit comment',
+            details: error.message
+        });
+    }
+};
+
+// Delete a comment
+export const deleteComment = async (req, res) => {
+    try {
+        const { quoteId, commentId } = req.params;
+        const userId = req.user.id;
+        
+        const quote = await Quote.findById(quoteId);
+        if (!quote) {
+            return res.status(404).json({
+                error: 'Quote not found'
+            });
+        }
+        
+        const comment = quote.comments.id(commentId);
+        if (!comment) {
+            return res.status(404).json({
+                error: 'Comment not found'
+            });
+        }
+        
+        // Check if user owns the comment or the quote
+        if (comment.userId.toString() !== userId && quote.userId.toString() !== userId) {
+            return res.status(403).json({
+                error: 'You can only delete your own comments or comments on your quotes'
+            });
+        }
+        
+        quote.comments.pull(commentId);
+        await quote.save();
+        
+        res.json({
+            success: true,
+            message: 'Comment deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete Comment Error:', error);
+        res.status(500).json({
+            error: 'Failed to delete comment',
+            details: error.message
+        });
+    }
+};
+
 // Get total likes for a user (across all their quotes)
 export const getUserTotalLikes = async (req, res) => {
     try {
