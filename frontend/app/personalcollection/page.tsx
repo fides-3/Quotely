@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from '../theme-toggle';
-import { QuoteIcon, TrashIcon, HeartIcon, MessageCircleIcon, SendIcon } from 'lucide-react';
+import { QuoteIcon, TrashIcon, HeartIcon, MessageCircleIcon, SendIcon, EditIcon, Trash2Icon, CheckIcon, XIcon } from 'lucide-react';
 import axios from '../api/axiosInstance';
 
 interface Comment {
@@ -14,6 +14,7 @@ interface Comment {
   };
   content: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 interface Quote {
@@ -35,6 +36,8 @@ export default function PersonalCollection() {
   const [success, setSuccess] = useState('');
   const [commentInputs, setCommentInputs] = useState<{[key: string]: string}>({});
   const [submittingComments, setSubmittingComments] = useState<{[key: string]: boolean}>({});
+  const [editingComments, setEditingComments] = useState<{[key: string]: boolean}>({});
+  const [editCommentInputs, setEditCommentInputs] = useState<{[key: string]: string}>({});
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -111,6 +114,63 @@ export default function PersonalCollection() {
       console.error('Comment error:', err);
     } finally {
       setSubmittingComments(prev => ({ ...prev, [quoteId]: false }));
+    }
+  };
+
+  const handleEditComment = (commentId: string, currentContent: string) => {
+    setEditingComments(prev => ({ ...prev, [commentId]: true }));
+    setEditCommentInputs(prev => ({ ...prev, [commentId]: currentContent }));
+  };
+
+  const handleCancelEdit = (commentId: string) => {
+    setEditingComments(prev => ({ ...prev, [commentId]: false }));
+    setEditCommentInputs(prev => ({ ...prev, [commentId]: '' }));
+  };
+
+  const handleSaveEdit = async (quoteId: string, commentId: string) => {
+    const content = editCommentInputs[commentId]?.trim();
+    if (!content) return;
+
+    try {
+      const response = await axios.put(`/quote/${quoteId}/comment/${commentId}`, { content });
+      if (response.data.success) {
+        setQuotes(prev => prev.map(quote => 
+          quote._id === quoteId 
+            ? {
+                ...quote, 
+                comments: quote.comments.map(comment => 
+                  comment._id === commentId 
+                    ? response.data.comment
+                    : comment
+                )
+              }
+            : quote
+        ));
+        setEditingComments(prev => ({ ...prev, [commentId]: false }));
+        setEditCommentInputs(prev => ({ ...prev, [commentId]: '' }));
+      }
+    } catch (err: any) {
+      console.error('Edit comment error:', err);
+    }
+  };
+
+  const handleDeleteComment = async (quoteId: string, commentId: string) => {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+
+    try {
+      const response = await axios.delete(`/quote/${quoteId}/comment/${commentId}`);
+      if (response.data.success) {
+        setQuotes(prev => prev.map(quote => 
+          quote._id === quoteId 
+            ? {
+                ...quote, 
+                comments: quote.comments.filter(comment => comment._id !== commentId)
+              }
+            : quote
+        ));
+      }
+    } catch (err: any) {
+      console.error('Delete comment error:', err);
     }
   };
 
@@ -250,18 +310,73 @@ export default function PersonalCollection() {
                     <div className="mb-4 space-y-3">
                       {quote.comments.map((comment) => (
                         <div key={comment._id} className="bg-amber-50 dark:bg-gray-700 rounded-lg p-3">
-                          <div className="flex items-start space-x-3">
+                          <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                              <p className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-1">
                                 {comment.userId.username}
                               </p>
-                              <p className="text-amber-800 dark:text-amber-200 mt-1">
-                                {comment.content}
-                              </p>
-                              <p className="text-amber-600 dark:text-amber-400 text-xs mt-1">
-                                {formatDate(comment.createdAt)}
-                              </p>
+                              
+                              {editingComments[comment._id] ? (
+                                <div className="space-y-2">
+                                  <input
+                                    type="text"
+                                    value={editCommentInputs[comment._id] || ''}
+                                    onChange={(e) => setEditCommentInputs(prev => ({ ...prev, [comment._id]: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded border border-amber-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-amber-900 dark:text-amber-100 focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm"
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit(quote._id, comment._id)}
+                                  />
+                                  <div className="flex space-x-2">
+                                    <button
+                                      onClick={() => handleSaveEdit(quote._id, comment._id)}
+                                      className="flex items-center space-x-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
+                                    >
+                                      <CheckIcon className="w-3 h-3" />
+                                      <span>Save</span>
+                                    </button>
+                                    <button
+                                      onClick={() => handleCancelEdit(comment._id)}
+                                      className="flex items-center space-x-1 px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 transition-colors"
+                                    >
+                                      <XIcon className="w-3 h-3" />
+                                      <span>Cancel</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <p className="text-amber-800 dark:text-amber-200 mt-1">
+                                    {comment.content}
+                                  </p>
+                                  <p className="text-amber-600 dark:text-amber-400 text-xs mt-1">
+                                    {formatDate(comment.createdAt)}
+                                    {comment.updatedAt && (
+                                      <span className="ml-2 text-amber-500 dark:text-amber-400">
+                                        (edited)
+                                      </span>
+                                    )}
+                                  </p>
+                                </>
+                              )}
                             </div>
+                            
+                            {!editingComments[comment._id] && (
+                              <div className="flex space-x-2 ml-2">
+                                <button
+                                  onClick={() => handleEditComment(comment._id, comment.content)}
+                                  className="p-1 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+                                  title="Edit comment"
+                                >
+                                  <EditIcon className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteComment(quote._id, comment._id)}
+                                  className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                                  title="Delete comment"
+                                >
+                                  <Trash2Icon className="w-3 h-3" />
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
