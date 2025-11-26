@@ -1,10 +1,10 @@
 'use client'
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
-import { ThemeToggle } from '../../theme-toggle';
+import { useAuth } from    '../context/AuthContext';
+import { ThemeToggle } from '../theme-toggle';
 import { QuoteIcon, HeartIcon, MessageCircleIcon, UserIcon, SendIcon } from 'lucide-react';
-import axios from '../../api/axiosInstance';
+import axios from '../api/axiosInstance';
 
 interface User {
   _id: string;
