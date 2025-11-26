@@ -8,6 +8,8 @@ router.get('/my-quotes', verifyToken, quoteContoller.getUserQuotes);
 router.get('/user/:userId', quoteContoller.getQuotesByUserId);
 router.post('/:quoteId/like', verifyToken, quoteContoller.toggleLikeQuote);
 router.post('/:quoteId/comment', verifyToken, quoteContoller.addComment);
+router.put('/:quoteId/comment/:commentId', verifyToken, quoteContoller.editComment);
+router.delete('/:quoteId/comment/:commentId', verifyToken, quoteContoller.deleteComment);
 router.get('/total-likes', verifyToken, quoteContoller.getUserTotalLikes);
 
 export default router;
