@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from '../theme-toggle';
 import { SearchIcon, UserIcon } from 'lucide-react';
 import axios from '../api/axiosInstance';
+import Link from 'next/link';
+import Image from "next/image";
 
 interface User {
   _id: string;
@@ -88,18 +90,18 @@ export default function SearchUsers() {
       <header className="flex items-center justify-between px-4 md:px-6 py-3 bg-amber-100/90 dark:bg-gray-800/90 shadow-sm">
         <div className="text-xl font-bold text-amber-950 dark:text-amber-50">Quotely</div>
         <nav className="flex items-center space-x-3">
-          <a href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          <Link href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Home
-          </a>
-          <a href="/quoteinput" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/quoteinput" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Add Quote
-          </a>
-          <a href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             My Collection
-          </a>
-          <a href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Profile
-          </a>
+          </Link>
           <ThemeToggle />
         </nav>
       </header>
@@ -176,7 +178,7 @@ export default function SearchUsers() {
                       {/* USER AVATAR */}
                       <div className="w-12 h-12 rounded-full bg-amber-200 dark:bg-gray-600 border-2 border-amber-300 dark:border-gray-500 overflow-hidden flex-shrink-0">
                         {user.avatar ? (
-                          <img
+                          <Image
                             src={user.avatar}
                             alt={user.username}
                             className="w-full h-full object-cover"

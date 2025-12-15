@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from '../theme-toggle';
-import { QuoteIcon, TrashIcon, HeartIcon, MessageCircleIcon, SendIcon, EditIcon, Trash2Icon, CheckIcon, XIcon } from 'lucide-react';
+import { QuoteIcon, HeartIcon, MessageCircleIcon, SendIcon, EditIcon, Trash2Icon, CheckIcon, XIcon } from 'lucide-react';
 import axios from '../api/axiosInstance';
+import Link from 'next/link';
 
 interface Comment {
   _id: string;
@@ -69,6 +70,24 @@ export default function PersonalCollection() {
     }
   }, [isAuthenticated]);
 
+  // Test backend connectivity
+  const testBackendConnection = async () => {
+    try {
+      console.log('Testing backend connection...');
+      const response = await axios.get('/quote/my-quotes');
+      console.log('Backend connection test successful:', response.status);
+    } catch (err: any) {
+      console.error('Backend connection test failed:', err.response?.status, err.message);
+    }
+  };
+
+  // Run connectivity test when component mounts
+  useEffect(() => {
+    if (isAuthenticated) {
+      testBackendConnection();
+    }
+  }, [isAuthenticated]);
+
   const handleLikeQuote = async (quoteId: string) => {
     try {
       const response = await axios.post(`/quote/${quoteId}/like`);
@@ -129,28 +148,55 @@ export default function PersonalCollection() {
 
   const handleSaveEdit = async (quoteId: string, commentId: string) => {
     const content = editCommentInputs[commentId]?.trim();
-    if (!content) return;
+    if (!content) {
+      setError('Comment cannot be empty');
+      return;
+    }
 
     try {
-      const response = await axios.put(`/quote/${quoteId}/comment/${commentId}`, { content });
-      if (response.data.success) {
+      const url = `/quote/${quoteId}/comment/${commentId}`;
+      console.log('Saving comment edit:', { quoteId, commentId, content, url });
+      console.log('Full URL will be:', `http://localhost:5001${url}`);
+      
+      const response = await axios.put(url, { content });
+      console.log('Edit response:', response.data);
+      
+      if (response.data.success && response.data.comment) {
+        // Update the specific comment in the quotes array
         setQuotes(prev => prev.map(quote => 
           quote._id === quoteId 
             ? {
                 ...quote, 
                 comments: quote.comments.map(comment => 
                   comment._id === commentId 
-                    ? response.data.comment
+                    ? { 
+                        ...comment, 
+                        content: response.data.comment.content,
+                        updatedAt: response.data.comment.updatedAt 
+                      }
                     : comment
                 )
               }
             : quote
         ));
+        
+        // Reset editing state
         setEditingComments(prev => ({ ...prev, [commentId]: false }));
         setEditCommentInputs(prev => ({ ...prev, [commentId]: '' }));
+        setSuccess('Comment updated successfully!');
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError('Failed to update comment - invalid response');
       }
     } catch (err: any) {
       console.error('Edit comment error:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to edit comment';
+      setError(errorMessage);
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setError(''), 5001);
     }
   };
 
@@ -203,18 +249,18 @@ export default function PersonalCollection() {
       <header className="flex items-center justify-between px-4 md:px-6 py-3 bg-amber-100/90 dark:bg-gray-800/90 shadow-sm">
         <div className="text-xl font-bold text-amber-950 dark:text-amber-50">Quotely</div>
         <nav className="flex items-center space-x-3">
-          <a href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          <Link href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Home
-          </a>
-          <a href="/quoteinput" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/quoteinput" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Add Quote
-          </a>
-          <a href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Search Users
-          </a>
-          <a href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Profile
-          </a>
+          </Link>
           <ThemeToggle />
         </nav>
       </header>
@@ -417,13 +463,13 @@ export default function PersonalCollection() {
               <p className="text-amber-700 dark:text-amber-300 mb-6">
                 Start building your personal collection by saving quotes that inspire you. You can like and comment on your own quotes too!
               </p>
-              <a
+              <Link
                 href="/quoteinput"
                 className="inline-flex items-center space-x-2 px-6 py-3 bg-amber-950 dark:bg-amber-200 text-amber-50 dark:text-gray-900 font-medium rounded-lg hover:bg-amber-900 dark:hover:bg-amber-100 transition-colors shadow-md"
               >
                 <QuoteIcon className="w-5 h-5" />
                 <span>Add Your First Quote</span>
-              </a>
+              </Link>
             </div>
           </div>
         )}
@@ -431,13 +477,13 @@ export default function PersonalCollection() {
         {/* QUICK ACTIONS */}
         {quotes.length > 0 && (
           <div className="text-center mt-12">
-            <a
+            <Link
               href="/quoteinput"
               className="inline-flex items-center space-x-2 px-6 py-3 bg-amber-950 dark:bg-amber-200 text-amber-50 dark:text-gray-900 font-medium rounded-lg hover:bg-amber-900 dark:hover:bg-amber-100 transition-colors shadow-md"
             >
               <QuoteIcon className="w-5 h-5" />
               <span>Add Another Quote</span>
-            </a>
+            </Link>
           </div>
         )}
       </div>

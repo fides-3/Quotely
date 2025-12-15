@@ -1,10 +1,12 @@
 'use client'
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from    '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../../theme-toggle';
 import { QuoteIcon, HeartIcon, MessageCircleIcon, UserIcon, SendIcon, EditIcon, Trash2Icon, CheckIcon, XIcon } from 'lucide-react';
 import axios from '../../api/axiosInstance';
+import Link from 'next/link';
+import Image from "next/image";
 
 interface User {
   _id: string;
@@ -259,18 +261,18 @@ export default function PublicProfile() {
       <header className="flex items-center justify-between px-4 md:px-6 py-3 bg-amber-100/90 dark:bg-gray-800/90 shadow-sm">
         <div className="text-xl font-bold text-amber-950 dark:text-amber-50">Quotely</div>
         <nav className="flex items-center space-x-3">
-          <a href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          <Link  href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Home
-          </a>
-          <a href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Search Users
-          </a>
-          <a href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             My Collection
-          </a>
-          <a href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Profile
-          </a>
+          </Link>
           <ThemeToggle />
         </nav>
       </header>
@@ -284,7 +286,7 @@ export default function PublicProfile() {
               {/* USER AVATAR */}
               <div className="w-20 h-20 rounded-full bg-amber-200 dark:bg-gray-600 border-4 border-amber-300 dark:border-gray-500 overflow-hidden flex-shrink-0">
                 {user.avatar ? (
-                  <img
+                  <Image
                     src={user.avatar}
                     alt={user.username}
                     className="w-full h-full object-cover"
@@ -489,7 +491,7 @@ export default function PublicProfile() {
                   No Quotes Yet
                 </h3>
                 <p className="text-amber-700 dark:text-amber-300">
-                  This user hasn't posted any quotes yet.
+                  This user hasn`&apos;`t posted any quotes yet.
                 </p>
               </div>
             </div>

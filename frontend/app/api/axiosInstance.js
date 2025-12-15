@@ -1,6 +1,6 @@
 import axios  from "axios";
 const axiosInstance=axios.create({
-    baseURL:"http://localhost:5000",
+    baseURL:"http://localhost:5001",
     withCredentials:true,
 
 })
@@ -43,7 +43,7 @@ async(error)=>{
             // Try to refresh the token
             const refreshResponse=await axios.get("/auth/refresh",{
                 withCredentials:true,
-                baseURL: "http://localhost:5000",
+                baseURL: "http://localhost:5001",
             })
 
             if (refreshResponse.data.accessToken){
@@ -59,8 +59,9 @@ async(error)=>{
                 OriginalRequest.headers.Authorization=`Bearer ${refreshResponse.data.accessToken}`;
                 return axiosInstance(OriginalRequest)
             }
-        }catch(refreshError){
+        }catch(err){
             // Refresh failed redirect to login
+            console.error('Token refresh failed:',err);
             localStorage.removeItem("auth");
             window.location.href='/login'
         

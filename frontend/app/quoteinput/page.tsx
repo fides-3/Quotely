@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { ThemeToggle } from "../theme-toggle";
 import { QuoteIcon, UserIcon, SendIcon } from "lucide-react";
 import axios from '../api/axiosInstance'
+import Link from 'next/link';
 
 export default function QuoteInput() {
   const router = useRouter()
@@ -66,10 +67,10 @@ export default function QuoteInput() {
       <header className="flex items-center justify-between px-6 py-3 bg-amber-100/90 dark:bg-gray-800/90 shadow-lg sticky top-0 z-10">
         <div className="text-xl font-bold text-amber-950 dark:text-amber-50">Quotely</div>
         <nav className="flex items-center space-x-3">
-          <a href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Home</a>
-          <a href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">My Collection</a>
-          <a href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Search Users</a>
-          <a href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Profile</a>
+          < Link href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Home</Link>
+          <Link href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">My Collection</Link>
+          <Link href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Search Users</Link>
+          <Link href="/profile" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50 transition duration-150">Profile</Link>
           <ThemeToggle />
         </nav>
       </header>

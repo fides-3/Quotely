@@ -35,7 +35,7 @@ export default function PasswordReset() {
         setSuccess("");
 
         try {
-            const res = await axios.post("http://localhost:5000/auth/forgotPassword", { email });
+            const res = await axios.post("http://localhost:5001/auth/forgotPassword", { email });
             setSuccess(`Password reset instructions have been sent. Reset token: ${res.data.resetToken}`);
             setStep("reset");
         } catch (err: any) {
@@ -66,7 +66,7 @@ export default function PasswordReset() {
         }
 
         try {
-            await axios.post("http://localhost:5000/auth/resetPassword", {
+            await axios.post("http://localhost:5001/auth/resetPassword", {
                 resetToken: resetForm.resetToken,
                 newPassword: resetForm.newPassword
             });

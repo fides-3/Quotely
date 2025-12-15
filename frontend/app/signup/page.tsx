@@ -61,7 +61,7 @@ export default function Signup() {
 
     try {
       console.log("Attempting registration with:", form);
-      const res = await axios.post("http://localhost:5000/auth/register", form);
+      const res = await axios.post("http://localhost:5001/auth/register", form);
       console.log("Registration response:", res.data);
       setSuccess("Registration successful! You can now log in.")
 

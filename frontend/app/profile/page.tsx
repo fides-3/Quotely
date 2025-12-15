@@ -1,9 +1,11 @@
 'use client'
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect} from "react";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from '../theme-toggle';
 import axios from '../api/axiosInstance';
+import Link from 'next/link';
+import Image from "next/image";
 
 interface UserProfile {
   _id: string;
@@ -16,7 +18,7 @@ interface UserProfile {
 
 export default function Profile() {
   const router = useRouter();
-  const { auth, logout, isAuthenticated, loading: authLoading } = useAuth();
+  const {  logout, isAuthenticated, loading: authLoading } = useAuth();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -42,7 +44,7 @@ export default function Profile() {
       
       try {
         // Fetch profile data
-        const profileResponse = await axios.get('http://localhost:5000/auth/profile');
+        const profileResponse = await axios.get('http://localhost:5001/auth/profile');
         if (profileResponse.data.success) {
           setUser(profileResponse.data.user);
           setEditForm({
@@ -99,7 +101,7 @@ export default function Profile() {
     setSuccess('');
 
     try {
-      const response = await axios.put('http://localhost:5000/auth/profile', editForm);
+      const response = await axios.put('http://localhost:5001/auth/profile', editForm);
       if (response.data.success) {
         setUser(response.data.user);
         setIsEditing(false);
@@ -195,18 +197,18 @@ export default function Profile() {
       <header className="flex items-center justify-between px-4 md:px-6 py-3 bg-amber-100/90 dark:bg-gray-800/90 shadow-sm">
         <div className="text-xl font-bold text-amber-950 dark:text-amber-50">Quotely</div>
         <nav className="flex items-center space-x-3">
-          <a href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          <Link href="/" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Home
-          </a>
-          <a href="/quoteinput" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/quoteinput" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Add Quote
-          </a>
-          <a href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/personalcollection" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             My Collection
-          </a>
-          <a href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
+          </Link>
+          <Link href="/search" className="text-amber-800 hover:text-amber-950 dark:text-amber-200 dark:hover:text-amber-50">
             Search Users
-          </a>
+          </Link>
           <ThemeToggle />
         </nav>
       </header>
@@ -223,7 +225,7 @@ export default function Profile() {
               <div className="relative">
                 <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-amber-200 dark:bg-gray-600 border-4 border-white dark:border-gray-300 shadow-lg overflow-hidden">
                   {user?.avatar ? (
-                    <img
+                    <Image
                       src={user.avatar}
                       alt="Profile"
                       className="w-full h-full object-cover"
